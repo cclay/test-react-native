@@ -2,42 +2,91 @@
  * Sample React Native App
  * https://github.com/facebook/react-native
  */
- var MOCKED_MOVIES_DATA = [
-   {title: 'Title', year: '2015', posters: {thumbnail: 'http://i.imgur.com/UePbdph.jpg'}},
- ];
+ var REQUEST_URL = 'https://raw.githubusercontent.com/facebook/react-native/master/docs/MoviesExample.json';
+
+ var MOCKED_MOVIES_DATA = [{
+  title: 'Title',
+  year: '2015',
+  posters: {
+    thumbnail: 'http://i.imgur.com/UePbdph.jpg'
+  }
+}, ];
 
 import React, {
   AppRegistry,
   Component,
   Image,
+  ListView,
   StyleSheet,
   Text,
   View
 } from 'react-native';
 
 class AwesomeProject2 extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dataSource: new ListView.DataSource({
+        rowHasChanged: (row1, row2) => row1 !== ro2,
+      }),
+      loaded: false,
+    };
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData() {
+    fetch(REQUEST_URL)
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({
+          dataSource: this.state.dataSource.cloneWithRows(responseData.movies),
+          loaded: true,
+        });
+      })
+      .done();
+  }
+
   render() {
-    var movie = MOCKED_MOVIES_DATA[0];
-    return (
+     if (!this.state.loaded) {
+        return this.renderLoadingView();
+      }
+
+    return(
+     <ListView
+       dataSource={this.state.dataSource}
+       renderRow={this.renderMovie}
+       style={styles.listView}
+      />
+    );
+  }
+
+  renderLoadingView(){
+    return(
       <View style={styles.container}>
-      <Text> {movie.title}</Text>
-      <Text> {movie.year}</Text>
+       <Text> Loading movies </Text>
+       </View>
+    );
+  }
+
+  renderMovie(movie){
+    return(
+      <View style={styles.container}>
       <Image source={{uri: movie.posters.thumbnail}}
              style={styles.thumbnail}
       />
-
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Shake or press menu button for dev menu67
-        </Text>
+      <View style={styles.rightContainer}>
+        <Text style={styles.title}> {movie.title}</Text>
+        <Text style={styles.year}> {movie.year}</Text>
+      </View>
       </View>
     );
   }
+
+
 }
 
 
@@ -49,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  rightContainer:{
+  rightContainer: {
     flex: 1,
   },
   welcome: {
@@ -64,10 +113,22 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     margin: 10,
-    backgroundColor:'#FFCCFF',
-     width: 53,
-      height: 81,
-    },
+    padding: 20,
+    backgroundColor: '#FFCCFF',
+    width: 53,
+    height: 81,
+  },
+  listView: {
+    paddingTop: 20,
+    backgroundColor: '#CCFFFF',
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  year: {
+    textAlign: 'center',
+  },
 });
-
 AppRegistry.registerComponent('AwesomeProject2', () => AwesomeProject2);
